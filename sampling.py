@@ -6,15 +6,19 @@ import matplotlib.pyplot as plt
 
 #Sinusoidal equation (to describe the fish heading)
 alpha = 2.0         
-bias = 0
+offset = 0
 omega = 4.0
 period = (2*math.pi/omega)
 def sin_func(t):
-    return alpha * math.sin(omega*t) + bias
+    return alpha * math.sin(omega*t) + offset
+def sin_func_slanted(t):
+    return alpha * math.sin(omega*t) + offset + t
+def sin_func_curved(t):
+    return alpha * math.sin(omega*t) + offset + t**2
 
 #All x axis and y axis points
-time = np.arange(0, 30, 0.1)
-amplitude = [sin_func(t) for t in time]
+time = np.arange(0, 50, 0.1)
+amplitude = [sin_func_curved(t) for t in time]
 samples = []
 
 #Do the sampling in multiple ways
@@ -37,6 +41,7 @@ for x in range(0, len(amplitude), 1):       #10 samples per second
 #Use a moving average?
 
 #Plot the results
+plt.title('Straight Forward Fish Travel (bias of 5, no offset)')
 plt.plot(time, amplitude, color='blue', label='Fish heading')
 plt.plot(time2, samples, color='red', label='periodic averaging')
 
