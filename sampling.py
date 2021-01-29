@@ -10,7 +10,7 @@ class HeadingAveraging():
     def __init__(self, function='default', method='binning1', alpha=2.0, offset=0, omega=1.0, offset_2=0, omega_2=5.0):
         """
         function values: default; slanted; curved; special
-        method values: binning1 (default); binning2; running; moving
+        method values: binning1 (default); binning2; binning3; running; moving
         """
         self.function = function
         self.method = method
@@ -88,12 +88,7 @@ class HeadingAveraging():
             new_slope = (current_point - last_point) / 0.1
             if new_slope != 0:
                 new_slope = new_slope / abs(new_slope)
-            # if current_slope == -1:
-            #     if new_slope >= 0:
-            #         average = sum(avg_bin) / len(avg_bin)
-            #         samples.append(average)
-            #         sample_times.append(time_step)
-            #         avg_bin = []
+
             if current_slope == 1:
                 if new_slope <= 0:
                     average = sum(avg_bin) / len(avg_bin)
@@ -103,7 +98,36 @@ class HeadingAveraging():
             avg_bin.append(current_point)
             current_slope = new_slope
         return sample_times, samples
-     
+
+    def run_binning_average_3(self):
+        samples = []
+        sample_times = []
+        current_sum = 0
+        count = 0
+        current_point = 0
+        last_point = 0
+        current_slope = 0       #-1, 0, 1 for negative slope, zero slope, positive slope
+        for x in range(len(self.amplitude)):
+            time_step = float(x) / 10.0
+            #update every parameter
+            last_point = current_point
+            current_point = self.amplitude[x]
+            new_slope = (current_point - last_point) / 0.1
+            if new_slope != 0:
+                new_slope = new_slope / abs(new_slope)
+
+            if current_slope == 1:
+                if new_slope <= 0:
+                    average = current_sum / count
+                    samples.append(average)
+                    sample_times.append(time_step)
+                    current_sum = 0
+                    count = 0
+            current_sum += current_point
+            count += 1
+            current_slope = new_slope
+        return sample_times, samples
+
     #################
     #RUNNING AVERAGE#
     #################
@@ -144,6 +168,8 @@ class HeadingAveraging():
             sample_times, samples = self.run_running_average()
         elif self.method == 'moving':
             sample_times, samples = self.run_moving_average()
+        elif self.method == 'binning3':
+            sample_times, samples = self.run_binning_average_3()
         else:
             sample_times, samples = self.run_binning_average_1()
         return self.time, self.amplitude, sample_times, samples
@@ -151,9 +177,9 @@ class HeadingAveraging():
 if __name__ == '__main__':
     """
     function values: default; slanted; curved; special
-    method values: binning1 (default); binning2; running; moving
+    method values: binning1 (default); binning2; binning3; running; moving
     """    
-    experiment = HeadingAveraging(function='slanted', method='moving')
+    experiment = HeadingAveraging(function='slanted', method='binning3', alpha=2.0)
     time, amplitude, sample_times, samples = experiment.run()
     # sample_times_2, samples_2 = experiment.run_binning_average_2()
     # sample_times_3, samples_3 = experiment.run_running_average()
